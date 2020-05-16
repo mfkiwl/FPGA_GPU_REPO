@@ -19,8 +19,9 @@ canvas.create_image((width//2, height//2), image=img, state="normal")
 f = open(path_to_data, "r")
 
 for line in f.readlines():
-	point_array = [int(s) for s in line.split(',')]
-	img.put("#ffffff", (point_array[0], point_array[1]))
+	point_array = [str(s) for s in line.split(',')]
+	img.put(point_array[2], (int(point_array[0]), int(point_array[1])))
+	#img.put("#ffffff", (point_array[0], point_array[1]))
 	
 f.close()	
 mainloop()

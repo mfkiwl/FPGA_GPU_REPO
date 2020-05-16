@@ -12,7 +12,7 @@ void save_to_file(int *array_x, int *array_y, int num, FILE *fp);
 
 int Triangle_rasterize(const int x0, const int y0,const int x1, const int y1, const int x2, const int y2, int *array_x, int *array_y);
 
-void Triangle_rasterize2(const int x0, const int y0,const int x1, const int y1, const int x2, const int y2, FILE *fp);
+void Triangle_rasterize2(int x0, int y0,int x1,int y1, int x2, int y2, int start_color, int grad , FILE *fp);
 
 int main()
 {
@@ -24,10 +24,7 @@ int main()
         printf("FILE SYSTEM PROBLEM");
         return 666;
     }
-      Triangle_rasterize2(10, 10, 300, 60, 100, 200, pixel_txt);
-
-  //  pix_num  += Triangle_rasterize(10, 10, 300, 60, 100, 200, array_x + pix_num , array_y + pix_num);
-   // save_to_file(array_x, array_y, pix_num, pixel_txt);
+      Triangle_rasterize2(10, 10, 300, 60, 100, 200, 0xffffff, 2, pixel_txt);
     fclose(pixel_txt);
     system(PYTHON_SCRIPT);
 }
@@ -72,7 +69,7 @@ int Triangle_rasterize(int x0, int y0,int x1,int y1, int x2, int y2, int *array_
         return pix_num;
 }
 
-void Triangle_rasterize2(int x0, int y0,int x1,int y1, int x2, int y2, FILE *fp){
+void Triangle_rasterize2(int x0, int y0,int x1,int y1, int x2, int y2, int start_color, int grad , FILE *fp){
 
         int i, j, index = 0;
         int index2 = 0;
@@ -91,15 +88,17 @@ void Triangle_rasterize2(int x0, int y0,int x1,int y1, int x2, int y2, FILE *fp)
 
         for(i = y0; i< y1; i++){
             for(j = right_limit_x[index]; j <= left_limit_x[index] ; j++ ){
-                fprintf(fp,"%d, %d\n", j, i);
+                fprintf(fp,"%d, %d, #%x\n", j, i, start_color);
             }
+            start_color -= grad;
             index++;
         }
 
         for(i = y1; i<= y2; i++){
 
             for(j = right_limit_x[index2+index]; j <= upper_limit_x[index2] ; j++ ){
-                fprintf(fp,"%d, %d\n", j, i);
+                fprintf(fp,"%d, %d, #%x\n", j, i, start_color);
+                start_color -= grad;
             }
             index2++;
         }
