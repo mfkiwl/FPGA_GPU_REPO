@@ -1,0 +1,1 @@
+W tym folderze znajduj¹ siê pomocnicze skrypty napisane w jezyku Python 3.8.x

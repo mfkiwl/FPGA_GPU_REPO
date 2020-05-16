@@ -1,0 +1,1 @@
+W tym folderze znajduje siê w³aœciwa czêœæ projektu , zaimplementowana w jêzyku Verilog / SystemVerilog
