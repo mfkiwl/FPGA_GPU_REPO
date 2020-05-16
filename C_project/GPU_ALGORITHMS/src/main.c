@@ -3,9 +3,9 @@
 
 #define ARRAY_SIZE 100000
 
-#define PYTHON_SCRIPT "python C:\\Users\\Karol\\Desktop\\pyton_tkinter.py"
+#define PYTHON_SCRIPT "python ..\\..\\..\\..\\Python_files\\pyton_tkinter.py"
 
-#define PATH_TO_TEXT_FILE "C:\\Users\\Karol\\Desktop\\dziadostwo.txt"
+#define PATH_TO_TEXT_FILE "..\\..\\..\\..\\Other_data\\disp_data.txt"
 
 
 void save_to_file(int *array_x, int *array_y, int num, FILE *fp);
@@ -19,6 +19,10 @@ int main()
     int array_y[ARRAY_SIZE];
     int pix_num = 0;
     FILE *pixel_txt = fopen( PATH_TO_TEXT_FILE, "w" );
+    if(pixel_txt == NULL){
+        printf("FILE SYSTEM PROBLEM");
+        return 666;
+    }
    // pix_num = BresenhamLine(0, 0, 25, 50, array_x, array_y);
    // pix_num+= BresenhamLineCut(25,  50,  75, 100, array_x+pix_num, array_y+pix_num);
   //  pix_num+= BresenhamLineCut(75, 100, 200, 150, array_x+pix_num, array_y+pix_num);

@@ -1,9 +1,14 @@
 import random
 import math
+import sys
+import os
 from pathlib import Path
 from tkinter import Tk, Canvas, PhotoImage, mainloop
 
-path_to_data = Path("C:\\Users\\Karol\\Desktop\\dziadostwo.txt")
+#path_to_data = Path("..\\Other_data\\disp_data.txt")
+
+my_path = os.path.abspath(os.path.dirname(__file__))
+path_to_data = os.path.join(my_path, "..\\Other_data\\disp_data.txt")
 
 data_xy = open(path_to_data, "r")
 x_string = data_xy.readline()
