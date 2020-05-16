@@ -2,11 +2,11 @@
 1589644461 source:c:\users\karol\desktop\project_repo\fpga_gpu_repo\c_project\gpu_algorithms\src\bresenham.c
 	"../inc/bresenham.h"
 
-1589650806 source:c:\users\karol\desktop\project_repo\fpga_gpu_repo\c_project\gpu_algorithms\src\main.c
+1589655386 source:c:\users\karol\desktop\project_repo\fpga_gpu_repo\c_project\gpu_algorithms\src\main.c
 	<stdio.h>
 	<stdlib.h>
 
-1589644344 source:c:\users\karol\desktop\project_repo\fpga_gpu_repo\c_project\gpu_algorithms\src\rasterisation.c
+1589654644 source:c:\users\karol\desktop\project_repo\fpga_gpu_repo\c_project\gpu_algorithms\src\rasterisation.c
 	"../inc/bresenham.h"
 
 1589494039 c:\users\karol\desktop\project_repo\fpga_gpu_repo\c_project\gpu_algorithms\inc\bresenham.h
