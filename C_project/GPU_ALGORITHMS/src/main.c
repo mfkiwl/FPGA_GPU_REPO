@@ -41,12 +41,12 @@ int main()
     x_offset = 600;
     sort_verticles( 300, 100, 100, 100, 10, 10, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
     Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffff0f, 0, 0, pixel_txt);
-/*
+
     y_offset = 300;
     x_offset = 000;
-    sort_verticles( 10, 10, 100, 200, 300, 60,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+    sort_verticles( 10, 10, 100, 200, 300, 10,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
     Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfff0ff, 0, 0, pixel_txt);
-
+/*
     y_offset = 300;
     x_offset = 300;
     sort_verticles( 100, 200, 10, 10, 300, 60,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );

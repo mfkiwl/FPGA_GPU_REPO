@@ -133,7 +133,8 @@ void Triangle_rasterize_fsm(int lower_x, int lower_y, int mid_x, int mid_y, int 
         BresenhamLineCut(lower_x, lower_y, upper_x, upper_y, line1);
         BresenhamLineCut(lower_x, lower_y, mid_x,   mid_y,   line2);
         BresenhamLineCut(mid_x,   mid_y,   upper_x, upper_y, line3);
-        state = GET_LIMITS;
+        if(lower_y == mid_y) state = GET_LIMITS_2;
+        else state = GET_LIMITS;
         while(1){
             switch( state ){
 
