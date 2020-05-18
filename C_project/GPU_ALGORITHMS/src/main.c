@@ -10,96 +10,156 @@
 
 void save_to_file(int *array_x, int *array_y, int num, FILE *fp);
 
+void sort_verticles( int x_a, int y_a, int x_b, int y_b, int z_c, int z_b, int *lower_x, int *lower_y, int *mid_x, int *mid_y, int *upper_x, int *upper_y );
+
 int Triangle_rasterize(const int x0, const int y0,const int x1, const int y1, const int x2, const int y2, int *array_x, int *array_y);
 
-void Triangle_rasterize2(int x0, int y0,int x1,int y1, int x2, int y2, int start_color, int grad , FILE *fp);
+void Triangle_rasterize2(int lower_x, int lower_y, int mid_x, int mid_y, int upper_x, int uppe_y, int start_color, int x_grad, int y_grad , FILE *fp);
 
 int main()
 {
-    int array_x[ARRAY_SIZE];
-    int array_y[ARRAY_SIZE];
-    int pix_num = 0;
+    int y_offset, x_offset;
+    int lower_x, lower_y, mid_x, mid_y, upper_x, upper_y;
     FILE *pixel_txt = fopen( PATH_TO_TEXT_FILE, "w" );
     if(pixel_txt == NULL){
         printf("FILE SYSTEM PROBLEM");
         return 666;
     }
-      Triangle_rasterize2(10, 10, 300, 60, 100, 200, 0xffffff, 2, pixel_txt);
+
+    y_offset = 0;
+    x_offset = 0;
+    sort_verticles( 10, 10, 300, 60, 100, 200, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffffff, 0, 0, pixel_txt);
+
+    y_offset = 0;
+    x_offset = 300;
+    sort_verticles( 300, 60, 10, 10, 100, 200, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfffff0, 0, 0, pixel_txt);
+
+    y_offset = 0;
+    x_offset = 600;
+    sort_verticles( 300, 60, 100, 200, 10, 10, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffff0f, 0, 0, pixel_txt);
+
+    y_offset = 300;
+    x_offset = 000;
+    sort_verticles( 10, 10, 100, 200, 300, 60,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfff0ff, 0, 0, pixel_txt);
+
+    y_offset = 300;
+    x_offset = 300;
+    sort_verticles( 100, 200, 10, 10, 300, 60,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xff0fff, 0, 0, pixel_txt);
+
+    y_offset = 300;
+    x_offset = 600;
+    sort_verticles( 100, 200,  300, 60, 10, 10, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xf0ffff, 0, 0, pixel_txt);
+
     fclose(pixel_txt);
     system(PYTHON_SCRIPT);
 }
 
+void sort_verticles( int x_a, int y_a, int x_b, int y_b, int x_c, int y_c, int *lower_x, int *lower_y, int *mid_x, int *mid_y, int *upper_x, int *upper_y ){
 
-int Triangle_rasterize(int x0, int y0,int x1,int y1, int x2, int y2, int *array_x, int *array_y){
+    if( y_a > y_b){
 
-        int i, j, index = 0;
-        int index2 = 0;
-        int pix_num = 0;
-
-        int left_limit_x[200];
-
-        int right_limit_x[200];
-
-        int upper_limit_x[200];
-
-            BresenhamLineCut(x0, y0, x1, y1, left_limit_x);
-            BresenhamLineCut(x0, y0, x2, y2, right_limit_x);
-            BresenhamLineCut(x1, y1, x2, y2, upper_limit_x);
-        printf("done\n");
-
-        for(i = y0; i< y1; i++){
-            for(j = right_limit_x[index]; j <= left_limit_x[index] ; j++ ){
-                array_x[pix_num] = j;
-                array_y[pix_num] = i;
-                pix_num++;
-            }
-            index++;
+        if( y_c > y_a){
+            *upper_y = y_c;
+            *upper_x = x_c;
+            *mid_y   = y_a;
+            *mid_x   = x_a;
+            *lower_y = y_b;
+            *lower_x = x_b;
         }
-
-        for(i = y1; i<= y2; i++){
-
-            for(j = right_limit_x[index2+index]; j <= upper_limit_x[index2] ; j++ ){
-                array_x[pix_num] = j;
-                array_y[pix_num] = i;
-                pix_num++;
+        else{
+            if(y_b > y_c){
+                *upper_y = y_a;
+                *upper_x = x_a;
+                *mid_y   = y_b;
+                *mid_x   = x_b;
+                *lower_y = y_c;
+                *lower_x = x_c;
             }
-            index2++;
+            else{
+                *upper_y = y_a;
+                *upper_x = x_a;
+                *mid_y   = y_c;
+                *mid_x   = x_c;
+                *lower_y = y_b;
+                *lower_x = x_b;
+            }
         }
+    }
 
-        return pix_num;
+    else{
+
+        if( y_c > y_b){
+                *upper_y = y_c;
+                *upper_x = x_c;
+                *mid_y   = y_b;
+                *mid_x   = x_b;
+                *lower_y = y_a;
+                *lower_x = x_a;
+        }
+        else {
+
+            if( y_a > y_c){
+                *upper_y = y_b;
+                *upper_x = x_b;
+                *mid_y   = y_a;
+                *mid_x   = x_a;
+                *lower_y = y_c;
+                *lower_x = x_c;
+            }
+            else{
+                *upper_y = y_b;
+                *upper_x = x_b;
+                *mid_y   = y_c;
+                *mid_x   = x_c;
+                *lower_y = y_a;
+                *lower_x = x_a;
+            }
+        }
+    }
 }
 
-void Triangle_rasterize2(int x0, int y0,int x1,int y1, int x2, int y2, int start_color, int grad , FILE *fp){
+
+
+void Triangle_rasterize2(int lower_x, int lower_y, int mid_x, int mid_y, int upper_x, int upper_y, int start_color, int x_grad, int y_grad , FILE *fp){
 
         int i, j, index = 0;
         int index2 = 0;
         int pix_num = 0;
+        int color;
+        int left_limit_x[300];
 
-        int left_limit_x[200];
+        int right_limit_x[300];
 
-        int right_limit_x[200];
+        int upper_limit_x[300];
 
-        int upper_limit_x[200];
-
-        BresenhamLineCut(x0, y0, x1, y1, left_limit_x);
-        BresenhamLineCut(x0, y0, x2, y2, right_limit_x);
-        BresenhamLineCut(x1, y1, x2, y2, upper_limit_x);
+        BresenhamLineCut(lower_x, lower_y, mid_x, mid_y, left_limit_x);
+        BresenhamLineCut(lower_x, lower_y, upper_x, upper_y, right_limit_x);
+        BresenhamLineCut(mid_x, mid_y, upper_x, upper_y, upper_limit_x);
 
 
-        for(i = y0; i< y1; i++){
+        for(i = lower_y; i< mid_y; i++){
+            color = start_color;
             for(j = right_limit_x[index]; j <= left_limit_x[index] ; j++ ){
-                fprintf(fp,"%d, %d, #%x\n", j, i, start_color);
+                fprintf(fp,"%d, %d, #%x\n", j, i, color);
+                color -= x_grad;
             }
-            start_color -= grad;
+            start_color -= y_grad;
             index++;
         }
 
-        for(i = y1; i<= y2; i++){
-
+        for(i = mid_y; i<= upper_y; i++){
+            color = start_color;
             for(j = right_limit_x[index2+index]; j <= upper_limit_x[index2] ; j++ ){
-                fprintf(fp,"%d, %d, #%x\n", j, i, start_color);
-                start_color -= grad;
+                fprintf(fp,"%d, %d, #%x\n", j, i, color);
+                color -= x_grad;
             }
+            start_color -= y_grad;
             index2++;
         }
 }

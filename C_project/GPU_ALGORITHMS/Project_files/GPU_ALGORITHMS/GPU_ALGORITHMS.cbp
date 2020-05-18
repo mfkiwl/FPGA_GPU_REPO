@@ -31,7 +31,14 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.c">
+		<Unit filename="../../inc/bresenham.h" />
+		<Unit filename="../../src/bresenham.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../src/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../src/rasterisation.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>
