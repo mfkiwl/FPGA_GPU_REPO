@@ -1,10 +1,16 @@
 #include "../inc/bresenham.h"
+#include "stdlib.h"
+#include "stdio.h"
+
+typedef enum { START, HIGH_SLOPE, LOW_SLOPE, FINISH } Bresebham_state;
+
+typedef enum { GET_LIMITS, GET_LIMITS_2, DRAW_LINE } Triangle_state;
 
 int BresenhamLineCut(const int x1, const int y1, const int x2, const int y2, int *array_x)
  {
      int index = 0;
      // zmienne pomocnicze
-     int d, dx, dy, ai, bi, xi, yi;
+     int d, dx, dy, ai, bi, xi;
      int x = x1, y = y1;
      // ustalenie kierunku rysowania
      if (x1 < x2){
@@ -15,15 +21,8 @@ int BresenhamLineCut(const int x1, const int y1, const int x2, const int y2, int
          xi = -1;
          dx = x1 - x2;
      }
-     // ustalenie kierunku rysowania
-     if (y1 < y2){
-         yi = 1;
          dy = y2 - y1;
-     }
-     else{
-         yi = -1;
-         dy = y1 - y2;
-     }
+
      // pierwszy piksel
      array_x[index] = x;
      index++;
@@ -35,19 +34,16 @@ int BresenhamLineCut(const int x1, const int y1, const int x2, const int y2, int
          // pêtla po kolejnych x
          while (x != x2){
              // test wspó³czynnika
+             x+= xi;
              if (d >= 0)
              {
-                 x += xi;
-                 y += yi;
-                 d += ai;
-
+                d += ai;
                 array_x[index] = x;
                 index++;
              }
              else
              {
                  d += bi;
-                 x += xi;
              }
 
          }
@@ -60,24 +56,142 @@ int BresenhamLineCut(const int x1, const int y1, const int x2, const int y2, int
          // pêtla po kolejnych y
          while (y != y2){
              // test wspó³czynnika
+             y++;
              if (d >= 0)
              {
                  x += xi;
-                 y += yi;
                  d += ai;
-
-
              }
              else
              {
                  d += bi;
-                 y += yi;
              }
-                array_x[index] = x;
-                index++;
+             array_x[index] = x;
+             index++;
          }
      }
      return index;
  }
 
+void ModifiedBresenham(const int x1, const int y1, const int x2, const int y2, int *x_limit){
 
+    static Bresebham_state status= START;
+
+    static int d, dx, dy, ai, bi, xi;
+    static int x, y;
+
+    while(1){
+
+    switch( status ){
+
+        case START:
+            x = x1;
+            y = y1;
+
+            if (x1 < x2){
+                xi = 1;
+                dx = x2 - x1;
+            }
+            else{
+                xi = -1;
+                dx = x1 - x2;
+            }
+            dy = y2 - y1;
+
+            break;
+        case HIGH_SLOPE:
+
+
+
+            break;
+        case LOW_SLOPE:
+
+            break;
+        case FINISH:
+
+            break;
+        }
+
+    }
+}
+
+
+void Triangle_rasterize_fsm(int lower_x, int lower_y, int mid_x, int mid_y, int upper_x, int upper_y, int color, int x_grad, int y_grad , FILE *fp){
+
+        int y, x, index = 0;
+        int index2 = 0;
+        int pix_num = 0;
+        int upper_limit, lower_limit;
+        int line1[300];
+        int line2[300];
+        int line3[300];
+
+        Triangle_state state;
+        //fprintf(fp,"%d, %d, #%x\n", lower_x, lower_y, color);
+        //index++;
+        y = lower_y;
+        BresenhamLineCut(lower_x, lower_y, upper_x, upper_y, line1);
+        BresenhamLineCut(lower_x, lower_y, mid_x,   mid_y,   line2);
+        BresenhamLineCut(mid_x,   mid_y,   upper_x, upper_y, line3);
+        state = GET_LIMITS;
+        while(1){
+            switch( state ){
+
+                case GET_LIMITS:
+                    {
+
+                        if( line1[index] > line2[index]){
+                            upper_limit = line1[index];
+                            lower_limit = line2[index];
+                        }
+                        else{
+                            upper_limit = line2[index];
+                            lower_limit = line1[index];
+                        }
+                        state = DRAW_LINE;
+                        x = lower_limit;
+                        y++;
+                        index++;
+                        break;
+                    }
+               case GET_LIMITS_2:
+                    {
+                        if(y > upper_y) return;
+                        if( line1[index2 + index] >line3[index2]){
+                            upper_limit = line1[index2 + index];
+                            lower_limit = line3[index2];
+
+                        }
+                        else{
+                            upper_limit = line3[index2];
+                            lower_limit = line1[index2+index];
+                        }
+                        state = DRAW_LINE;
+                        x = lower_limit;
+                        y++;
+                        index2++;
+
+                        break;
+                    }
+                case DRAW_LINE:
+                    {
+                        fprintf(fp,"%d, %d, #%x\n", x, y, color);
+
+                        if(x == upper_limit){
+                            if( y < mid_y) state = GET_LIMITS;
+                            else{
+                                state = GET_LIMITS_2;
+                            }
+                        }
+                        x++;
+                        break;
+                    }
+            default:
+                printf("%d", state);
+                printf("ERROR");
+                return;
+                break;
+
+            }
+        }
+}

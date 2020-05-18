@@ -28,34 +28,35 @@ int main()
 
     y_offset = 0;
     x_offset = 0;
-    sort_verticles( 10, 10, 300, 60, 100, 200, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffffff, 0, 0, pixel_txt);
-
+    sort_verticles( 300, 10, 10, 60, 100, 200, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+   printf("start\n");
+   Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffffff, 0, 0, pixel_txt);
+    printf("done\n");
     y_offset = 0;
     x_offset = 300;
     sort_verticles( 300, 60, 10, 10, 100, 200, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfffff0, 0, 0, pixel_txt);
+    Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfffff0, 0, 0, pixel_txt);
 
     y_offset = 0;
     x_offset = 600;
-    sort_verticles( 300, 60, 100, 200, 10, 10, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffff0f, 0, 0, pixel_txt);
-
+    sort_verticles( 300, 100, 100, 100, 10, 10, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
+    Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffff0f, 0, 0, pixel_txt);
+/*
     y_offset = 300;
     x_offset = 000;
     sort_verticles( 10, 10, 100, 200, 300, 60,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfff0ff, 0, 0, pixel_txt);
+    Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfff0ff, 0, 0, pixel_txt);
 
     y_offset = 300;
     x_offset = 300;
     sort_verticles( 100, 200, 10, 10, 300, 60,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xff0fff, 0, 0, pixel_txt);
+    Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xff0fff, 0, 0, pixel_txt);
 
     y_offset = 300;
     x_offset = 600;
     sort_verticles( 100, 200,  300, 60, 10, 10, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-    Triangle_rasterize2(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xf0ffff, 0, 0, pixel_txt);
-
+   Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xf0ffff, 0, 0, pixel_txt);
+*/
     fclose(pixel_txt);
     system(PYTHON_SCRIPT);
 }
@@ -133,14 +134,13 @@ void Triangle_rasterize2(int lower_x, int lower_y, int mid_x, int mid_y, int upp
         int pix_num = 0;
         int color;
         int left_limit_x[300];
-
         int right_limit_x[300];
-
         int upper_limit_x[300];
 
-        BresenhamLineCut(lower_x, lower_y, mid_x, mid_y, left_limit_x);
-        BresenhamLineCut(lower_x, lower_y, upper_x, upper_y, right_limit_x);
-        BresenhamLineCut(mid_x, mid_y, upper_x, upper_y, upper_limit_x);
+
+            BresenhamLineCut(lower_x, lower_y, mid_x, mid_y, left_limit_x);
+            BresenhamLineCut(lower_x, lower_y, upper_x, upper_y, right_limit_x);
+            BresenhamLineCut(mid_x, mid_y, upper_x, upper_y, upper_limit_x);
 
 
         for(i = lower_y; i< mid_y; i++){
@@ -166,14 +166,4 @@ void Triangle_rasterize2(int lower_x, int lower_y, int mid_x, int mid_y, int upp
 
 
 
-void save_to_file(int *array_x, int *array_y, int num, FILE *fp){
-    int i;
-    for(i = 0; i< num; i++){
-        fprintf(fp,"%d,", array_x[i]);
-    }
-    fprintf(fp,"0\n");
-    for(i = 0; i< num; i++){
-        fprintf(fp,"%d,", array_y[i]);
-    }
-    fprintf(fp,"0\n");
-}
+
