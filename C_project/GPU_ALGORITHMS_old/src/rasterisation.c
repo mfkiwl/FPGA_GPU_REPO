@@ -6,7 +6,7 @@ typedef enum { START, HIGH_SLOPE, LOW_SLOPE, FINISH } Bresebham_state;
 
 typedef enum { GET_LIMITS, GET_LIMITS_2, DRAW_LINE } Triangle_state;
 
-int BresenhamLineCut(const int x1, const int y1, const int x2, const int y2, int *array_x)
+int LineLimiter(const int x1, const int y1, const int x2, const int y2, int *array_x)
  {
      int index = 0;
      // zmienne pomocnicze
@@ -35,15 +35,18 @@ int BresenhamLineCut(const int x1, const int y1, const int x2, const int y2, int
          while (x != x2){
              // test wspó³czynnika
              x+= xi;
+             array_x[index] = x;
+
              if (d >= 0)
              {
                 d += ai;
-                array_x[index] = x;
                 index++;
+
              }
              else
              {
                  d += bi;
+                 //index++;
              }
 
          }
@@ -126,13 +129,20 @@ void Triangle_rasterize_fsm(int lower_x, int lower_y, int mid_x, int mid_y, int 
         int line2[300];
         int line3[300];
 
+        unsigned char R;
+        unsigned char G;
+        unsigned char B;
+
         Triangle_state state;
         //fprintf(fp,"%d, %d, #%x\n", lower_x, lower_y, color);
         //index++;
+        R = (color>> 16)&0xFF;
+        G = (color>> 8)&0xFF;
+        B = color & 0xFF;
         y = lower_y;
-        BresenhamLineCut(lower_x, lower_y, upper_x, upper_y, line1);
-        BresenhamLineCut(lower_x, lower_y, mid_x,   mid_y,   line2);
-        BresenhamLineCut(mid_x,   mid_y,   upper_x, upper_y, line3);
+        LineLimiter(lower_x, lower_y, upper_x, upper_y, line1);
+        LineLimiter(lower_x, lower_y, mid_x,   mid_y,   line2);
+        LineLimiter(mid_x,   mid_y,   upper_x, upper_y, line3);
         if(lower_y == mid_y) state = GET_LIMITS_2;
         else state = GET_LIMITS;
         while(1){
@@ -175,10 +185,16 @@ void Triangle_rasterize_fsm(int lower_x, int lower_y, int mid_x, int mid_y, int 
                         break;
                     }
                 case DRAW_LINE:
-                    {
-                        fprintf(fp,"%d, %d, #%x\n", x, y, color);
+                {
+                   if( !R&&!G&&!B )  fprintf(fp,"%d, %d, #000000", x, y);
+                   if( R < 16)       fprintf(fp,"%d, %d, #0%x\n", x, y, (int)(R<<16|G<<8|B));
+                   else     fprintf(fp,"%d, %d, #%x\n", x, y, (int)(R<<16|G<<8|B));
 
                         if(x == upper_limit){
+                            if( R > x_grad ) R-=x_grad;
+                            if( G > x_grad ) G-=x_grad;
+                            if( B > x_grad ) B-=x_grad;
+
                             if( y < mid_y) state = GET_LIMITS;
                             else{
                                 state = GET_LIMITS_2;

@@ -21,16 +21,18 @@ int main()
     int y_offset, x_offset;
     int lower_x, lower_y, mid_x, mid_y, upper_x, upper_y;
     FILE *pixel_txt = fopen( PATH_TO_TEXT_FILE, "w" );
-    if(pixel_txt == NULL){
-        printf("FILE SYSTEM PROBLEM");
-        return 666;
-    }
+
+    int line1[300];
+    int line2[300];
+    int line3[300];
+
+    int i;
 
     y_offset = 0;
     x_offset = 0;
     sort_verticles( 300, 10, 10, 60, 100, 200, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
    printf("start\n");
-   Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffffff, 0, 0, pixel_txt);
+   Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffffff, 2, 0, pixel_txt);
     printf("done\n");
     y_offset = 0;
     x_offset = 300;
@@ -40,13 +42,13 @@ int main()
     y_offset = 0;
     x_offset = 600;
     sort_verticles( 300, 100, 100, 100, 10, 10, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-    Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffff0f, 0, 0, pixel_txt);
+    Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xffff0f, 3, 0, pixel_txt);
 
     y_offset = 300;
     x_offset = 000;
     sort_verticles( 10, 10, 100, 200, 300, 10,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-    Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfff0ff, 0, 0, pixel_txt);
-/*
+    Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xfff0ff, 1, 0, pixel_txt);
+
     y_offset = 300;
     x_offset = 300;
     sort_verticles( 100, 200, 10, 10, 300, 60,  &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
@@ -55,8 +57,8 @@ int main()
     y_offset = 300;
     x_offset = 600;
     sort_verticles( 100, 200,  300, 60, 10, 10, &lower_x, &lower_y, &mid_x, &mid_y, &upper_x, &upper_y );
-   Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xf0ffff, 0, 0, pixel_txt);
-*/
+   Triangle_rasterize_fsm(lower_x + x_offset , lower_y + y_offset, mid_x + x_offset, mid_y+ y_offset, upper_x + x_offset, upper_y + y_offset, 0xf0ffff, 5, 0, pixel_txt);
+
     fclose(pixel_txt);
     system(PYTHON_SCRIPT);
 }
@@ -138,9 +140,9 @@ void Triangle_rasterize2(int lower_x, int lower_y, int mid_x, int mid_y, int upp
         int upper_limit_x[300];
 
 
-            BresenhamLineCut(lower_x, lower_y, mid_x, mid_y, left_limit_x);
-            BresenhamLineCut(lower_x, lower_y, upper_x, upper_y, right_limit_x);
-            BresenhamLineCut(mid_x, mid_y, upper_x, upper_y, upper_limit_x);
+            LineLimiter(lower_x, lower_y, mid_x, mid_y, left_limit_x);
+            LineLimiter(lower_x, lower_y, upper_x, upper_y, right_limit_x);
+            LineLimiter(mid_x, mid_y, upper_x, upper_y, upper_limit_x);
 
 
         for(i = lower_y; i< mid_y; i++){

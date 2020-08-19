@@ -1,1 +1,6 @@
 W tym folderze znajduje siê wstêpny projekt napisany w jêzyku C
+
+Projekt GPU_ALGORITHMS zawiera³ algorytmy do rasteryzacji, które zapisywa³y dane (wspó³rzêdne i kolory RBG) do pliku tekstowego, 
+który nastêpnie by³ przetwarzany przez skrypt pythona, rozwi¹zanie okaza³o sie jednak zbyt  wolne. 
+
+Projekt rasterisation_test zawiera te same algorytmy ale wyœwietlanie obrazu odbywa sie za pomoc¹ API Windowsa (WinApi).
