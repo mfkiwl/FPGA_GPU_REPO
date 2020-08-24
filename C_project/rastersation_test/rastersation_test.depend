@@ -1,16 +1,21 @@
 # depslib dependency file v1.0
-1597773527 source:c:\users\karol\desktop\programy_c++\nowy folder\rastersation_test\main.cpp
+1598272003 source:c:\users\karol\desktop\programy_c++\nowy folder\rastersation_test\main.cpp
+	<stdio.h>
 	<tchar.h>
 	<windows.h>
 	"rasterisation.h"
+	"matrix_op.h"
 
 1597748965 c:\users\karol\desktop\programy_c++\nowy folder\rastersation_test\rasterisation.h
 
 1597750937 source:c:\users\karol\desktop\programy_c++\nowy folder\rastersation_test\rasterisation.cpp
 	"windows.h"
 
-1597773039 source:c:\users\karol\desktop\programy_c++\nowy folder\rastersation_test\matrix_op.cpp
+1598187025 source:c:\users\karol\desktop\programy_c++\nowy folder\rastersation_test\matrix_op.cpp
 	"matrix_op.h"
+	"rasterisation.h"
+	"stdio.h"
 
-1597771499 c:\users\karol\desktop\programy_c++\nowy folder\rastersation_test\matrix_op.h
+1598125501 c:\users\karol\desktop\programy_c++\nowy folder\rastersation_test\matrix_op.h
+	"windows.h"
 
