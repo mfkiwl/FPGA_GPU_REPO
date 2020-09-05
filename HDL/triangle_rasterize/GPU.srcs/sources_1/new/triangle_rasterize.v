@@ -421,12 +421,12 @@ end
                        line3_req_nxt = 0;
                        line2_req_nxt = 0;
                        line1_req_nxt = 0;          
-                       limiter_reset_nxt = 1;                  
+                       limiter_reset_nxt = 0;                  
                    end           
                    PRE_TRIGGER:
                    begin
                        limiter_reset_nxt = 0;
-                       line3_req_nxt = 1;
+                       line3_req_nxt = 0;
                        line2_req_nxt = 1;
                        line1_req_nxt = 1;
                    end       
