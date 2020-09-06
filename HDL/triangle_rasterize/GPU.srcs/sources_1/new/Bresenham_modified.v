@@ -50,8 +50,7 @@ module Bresenham_modified #(
     reg signed[DATA_WIDTH:0]decision;
     reg signed [15:0] delta_A;
     reg signed [15:0] delta_B; 
-    reg [DATA_WIDTH:0]x;
-    reg [DATA_WIDTH:0]y; 
+    reg [DATA_WIDTH:0]x; 
     reg signed [DATA_WIDTH:0]inc_x; 
     
     
@@ -68,8 +67,7 @@ module Bresenham_modified #(
             delta_B <= 0; 
             inc_x <= 0; 
             x <= 0;
-            y <= 0;
-            
+            ack <= 0;
         end
         else begin
             
@@ -81,7 +79,6 @@ module Bresenham_modified #(
                     if( req == 1) begin                       
                         status_reg <= DIRECTION_SET;               
                         x<= start_x;
-                        y<= start_y;  
                     end
                     else begin
                         status_reg <= START;                     
@@ -124,7 +121,6 @@ module Bresenham_modified #(
                 HIGH_SLOPE:
                 begin
                     ack <= 0;
-                    y <= y+1;
                     if( decision > 0 ) begin
                         decision <= decision + delta_B;
                         x <= x + inc_x;
@@ -147,7 +143,6 @@ module Bresenham_modified #(
                     if( decision > 0 ) begin
                         decision <= decision + delta_B;                  
                          status_reg <= POINT_FINISH_LO;
-                         y <= y+1;
                     end
                     else begin
                         decision <= decision + delta_A;   

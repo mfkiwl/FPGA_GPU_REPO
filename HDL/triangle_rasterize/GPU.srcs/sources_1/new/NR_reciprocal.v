@@ -62,6 +62,7 @@ always@(posedge clk or posedge rst) begin
         newVal     <=  0;
         st_reg     <=  START;
         ack        <=  0;
+        reciprocal <= 0;
     
     end
     else
@@ -85,11 +86,41 @@ always@* begin
         
         START:
         begin
-            ack_nxt = 0;
-            scaledVal_nxt = num;
-            scaling_nxt = FXP_SHIFT;
             if( req == 1'b1 ) st_reg_nxt = PRE_SCALING;
             else st_reg_nxt = START;
+        end
+        
+        PRE_SCALING:                  if( scaledVal_nxt < HALF ) st_reg_nxt = PRE_SCALING;
+                                      else                       st_reg_nxt = LINEAR_APPROX_MUL;
+        LINEAR_APPROX_MUL:            st_reg_nxt = LINEAR_APPROX_SHIFT; 
+        LINEAR_APPROX_SHIFT:          st_reg_nxt = LINEAR_APPROX_SUB;
+        LINEAR_APPROX_SUB:            st_reg_nxt = MUL_SCALED;   
+        MUL_SCALED:                   st_reg_nxt = SHIFT_SCALED;
+        SHIFT_SCALED:                 st_reg_nxt = SUB_2; 
+        SUB_2:                        st_reg_nxt = MUL_NEW;
+        MUL_NEW:                      st_reg_nxt = SCALING_2;      
+        SCALING_2:                    st_reg_nxt = COMPARE;
+        COMPARE:                      if( approxVal == newVal ) st_reg_nxt = FINAL_SCALING;
+                                      else                      st_reg_nxt = NEXT_ITERATION;
+        NEXT_ITERATION:               st_reg_nxt = MUL_SCALED;      
+        FINAL_SCALING:                st_reg_nxt = FINISH;     
+        FINISH:                       if(req == 0) st_reg_nxt = START;
+                                      else         st_reg_nxt = FINISH;        
+       default:                       st_reg_nxt = START;       
+     endcase
+     
+end
+
+// scaling
+
+always@* begin
+
+   case( st_reg )
+        
+        START:
+        begin
+            scaledVal_nxt = num;
+            scaling_nxt = FXP_SHIFT;
         end
         
         PRE_SCALING:
@@ -97,86 +128,78 @@ always@* begin
             if( scaledVal_nxt < HALF )begin
                 scaledVal_nxt = scaledVal << 1; // Multiply by two i.e. LSR
                 scaling_nxt = scaling - 1;
-                st_reg_nxt = PRE_SCALING;
             end
             else 
             begin
-                st_reg_nxt = LINEAR_APPROX_MUL;
+                scaledVal_nxt = scaledVal; // Multiply by two i.e. LSR
+                scaling_nxt = scaling;
             end
         end
-        LINEAR_APPROX_MUL:
-        begin
-            mulResult_nxt = scaledVal * A;
-            st_reg_nxt = LINEAR_APPROX_SHIFT;
-        end
-        LINEAR_APPROX_SHIFT:
-        begin
-            approxVal_nxt = mulResult >> FXP_SHIFT;
-            st_reg_nxt = LINEAR_APPROX_SUB;
-        end
-        LINEAR_APPROX_SUB:
-        begin
-             approxVal_nxt = B - approxVal;
-             st_reg_nxt = MUL_SCALED;
-        end    
-        MUL_SCALED:
-        begin
-            mulResult_nxt = approxVal * scaledVal; 
-            st_reg_nxt = SHIFT_SCALED;
-        end
-        SHIFT_SCALED:
-        begin
-            newVal_nxt = mulResult >> FXP_SHIFT;
-            st_reg_nxt = SUB_2;
-        end
-        SUB_2:
-        begin
-            newVal_nxt = TWO - newVal;
-            st_reg_nxt = MUL_NEW;
-        end
-        MUL_NEW:
-        begin
-            mulResult_nxt = approxVal * newVal;
-            st_reg_nxt = SCALING_2;
-        end
-        SCALING_2:
-        begin
-            newVal_nxt = mulResult >> FXP_SHIFT;  
-            st_reg_nxt = COMPARE;
-        end
-        COMPARE:
-        begin
-            if( approxVal == newVal ) st_reg_nxt = FINAL_SCALING;
-            else                      st_reg_nxt = NEXT_ITERATION;
-        end
-        NEXT_ITERATION:
-        begin
-            approxVal_nxt = newVal; // ASSIGN_NEW
-            st_reg_nxt = MUL_SCALED;
-        end
-        
-        FINAL_SCALING:
-        begin
-         approxVal_nxt = approxVal>> scaling;
-         st_reg_nxt = FINISH;
-        end
-        
-        FINISH:
-        begin
-            reciprocal_nxt = approxVal;
-            ack_nxt = 1'b1;
-            
-            if(req == 0) st_reg_nxt = START;
-            else         st_reg_nxt = FINISH;
-            
-        end
+       
        default:
        begin
-            st_reg_nxt = START;
+                scaledVal_nxt = scaledVal; // Multiply by two i.e. LSR
+                scaling_nxt = scaling;
        end 
        
      endcase
      
 end
      
+
+
+    // approx val
+always@* begin
+
+   case( st_reg )
+        
+        LINEAR_APPROX_SHIFT:   approxVal_nxt = mulResult >> FXP_SHIFT;
+        LINEAR_APPROX_SUB:     approxVal_nxt = B - approxVal;
+        NEXT_ITERATION:        approxVal_nxt = newVal; // ASSIGN_NEW        
+        FINAL_SCALING:         approxVal_nxt = approxVal>> scaling;
+        default:               approxVal_nxt = approxVal;      
+     endcase
+     
+end
+
+// mul result
+
+always@* begin
+   case( st_reg )      
+        LINEAR_APPROX_MUL:     mulResult_nxt = scaledVal * A;  
+        MUL_SCALED:            mulResult_nxt = approxVal * scaledVal; 
+        MUL_NEW:               mulResult_nxt = approxVal * newVal;   
+       default:                mulResult_nxt = mulResult;  
+     endcase   
+end
+
+// new val
+
+always@* begin
+   case( st_reg )      
+        SHIFT_SCALED:   newVal_nxt = mulResult >> FXP_SHIFT;
+        SUB_2:          newVal_nxt = TWO - newVal;
+        SCALING_2:      newVal_nxt = mulResult >> FXP_SHIFT;  
+        default:        newVal_nxt = newVal;
+     endcase   
+end
+
+always@* begin
+
+   case( st_reg )
+
+        FINISH:
+        begin
+            reciprocal_nxt = approxVal;
+            ack_nxt = 1'b1;                   
+        end
+       default:
+        begin
+            ack_nxt = 0;
+            reciprocal_nxt = reciprocal;       
+        end
+       
+     endcase
+     
+end
 endmodule

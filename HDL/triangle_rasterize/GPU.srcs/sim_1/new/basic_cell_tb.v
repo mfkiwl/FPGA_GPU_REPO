@@ -47,7 +47,6 @@ module basic_cell_tb(
     reg clk;
     reg rst;
 
-    wire ack_out_rast;
     wire [15:0] out_x;
     wire [15:0] out_y;
 
@@ -79,6 +78,7 @@ module basic_cell_tb(
     
     wire ack_out;
     
+    wire ack_in;
     reg pp_req;
     
     
@@ -86,128 +86,36 @@ module basic_cell_tb(
     wire pp_req_out_mid;
     wire pp_req_out_lower;
     
-    triangle_rasterize triangle1(
+    
+    basic_cell DUT (
         .clk(clk),
         .rst(rst),
-        .req(pp_req_out_lower & pp_req_out_mid & pp_req_out_upper),  
-        .upper_x(upper_x_inter),
-        .upper_y(upper_y_inter),     
-        .mid_x(mid_x_inter),
-        .mid_y(mid_y_inter), 
-        .lower_x(lower_x_inter),
-        .lower_y(lower_y_inter),
+        .pp_req(pp_req),
+        .upper_x({upper_x}),
+        .upper_y({upper_y}),
+        .upper_z({upper_z}),
+        .mid_x({mid_x}),
+        .mid_y({mid_y}),
+        .mid_z({mid_z}),
+        .lower_x({lower_x}),
+        .lower_y({lower_y}), 
+        .lower_z({lower_z}),
+    
+        .grad_in(grad_in),
+        .base_color(base_color),
+        
         .out_x(out_x),
-        .out_y(out_y), 
+        .out_y(out_y),    
         .ack_out(ack_out),
-        .ack_in(ack_out_rast),
+               
         .R_out(R_out),
         .G_out(G_out),
-        .B_out(B_out),
-        .base_color(base_color),
-        .grad(grad_in)
-        );
-    
-    wire rec_req_upper;
-    wire [31:0]reciprocal_upper;
-    wire [31:0]result_upper;
-    wire rec_ack_upper;
-    wire pp_ack_upper;
+        .B_out(B_out), 
+        .ack_in(ack_in)
         
-    NR_reciprocal NR_upper(
-        .clk(clk),
-        .rst(rst),
-        .req(rec_req_upper),
-        .num(reciprocal_upper),
-        .reciprocal(result_upper),
-        .ack(rec_ack_upper)
-        );
         
-    perspective_projection_fxp upper(
-        .clk(clk),
-        .rst(rst),
-        .pp_req_in(pp_req),
-        .in_x({16'b0,upper_x}),   
-        .in_y({16'b0,upper_y}),   
-        .in_z({16'b0,upper_z}), 
-        .rec_ack(rec_ack_upper), 
-        .reciprocal_out(result_upper),
-        .pp_ack_in(pp_ack_upper),
-        .rec_req(rec_req_upper),
-        .out_x(upper_x_inter),
-        .out_y(upper_y_inter),
-        .reciprocal_in(reciprocal_upper),
-        .pp_ack_out(ack_out_rast),
-        .pp_req_out(pp_req_out_upper)    
-    );
+        );
 
-
-    wire rec_req_mid;
-    wire [31:0]reciprocal_mid;
-    wire [31:0]result_mid;
-    wire rec_ack_mid;
-    wire pp_ack_mid;
-        
-    NR_reciprocal NR_mid(
-        .clk(clk),
-        .rst(rst),
-        .req(rec_req_mid),
-        .num(reciprocal_mid),
-        .reciprocal(result_mid),
-        .ack(rec_ack_mid)
-        );
-            
-    perspective_projection_fxp mid(
-        .clk(clk),
-        .rst(rst),
-        .pp_req_in(pp_req),
-        .in_x({16'b0,mid_x}),   
-        .in_y({16'b0,mid_y}),   
-        .in_z({16'b0,mid_z}), 
-        .rec_ack(rec_ack_mid), 
-        .reciprocal_out(result_mid),
-        .pp_ack_in(pp_ack_mid),
-        .rec_req(rec_req_mid),
-        .out_x(mid_x_inter),
-        .out_y(mid_y_inter),
-        .reciprocal_in(reciprocal_mid),
-        .pp_ack_out(ack_out_rast),
-        .pp_req_out(pp_req_out_mid)
-                
-    );
-    
-    wire rec_req_lower;
-    wire [31:0]reciprocal_lower;
-    wire [31:0]result_lower;
-    wire rec_ack_lower;
-    wire pp_ack_lower;
-        
-    NR_reciprocal NR_lower(
-        .clk(clk),
-        .rst(rst),
-        .req(rec_req_lower),
-        .num(reciprocal_lower),
-        .reciprocal(result_lower),
-        .ack(rec_ack_lower)
-        );
-    
-    perspective_projection_fxp low(
-        .clk(clk),
-        .rst(rst),
-        .pp_req_in(pp_req),
-        .in_x({16'b0,lower_x}),   
-        .in_y({16'b0,lower_y}),   
-        .in_z({16'b0,lower_z}), 
-        .rec_ack(rec_ack_lower), 
-        .reciprocal_out(result_lower),
-        .pp_ack_in(pp_ack_lower),
-        .rec_req(rec_req_lower),
-        .out_x(lower_x_inter),
-        .out_y(lower_y_inter),
-        .reciprocal_in(reciprocal_lower),
-        .pp_ack_out(ack_out_rast),
-        .pp_req_out(pp_req_out_lower)
-                
-    );        
                     
         integer file_ptr;
         integer file_open;
@@ -322,7 +230,7 @@ module basic_cell_tb(
         TEST_PROCESSING:
         begin
             pp_req = 1'b1;
-            if(pp_ack_lower == 1'b1) test_state = TEST_FINISH;
+            if(ack_in == 1'b1) test_state = TEST_FINISH;
             else if( ack_out == 1'b1 ) test_state = TEST_SAVE_RESULTS;
             else test_state = TEST_PROCESSING;
         end
@@ -332,7 +240,7 @@ module basic_cell_tb(
             $display("X = %d, Y= %d", out_x, out_y);
             color_out = ((R_out<<16)|(G_out<<8)|B_out);
             $fwriteb(file_ptr, "%d,%d,#%x\n", out_x, out_y, color_out) ;
-            if(pp_ack_lower == 1'b1) test_state = TEST_FINISH;
+            if(ack_in == 1'b1) test_state = TEST_FINISH;
             else if( ack_out == 1'b0 ) test_state = TEST_PROCESSING;
             else test_state =  TEST_SAVE_RESULTS; 
         end  

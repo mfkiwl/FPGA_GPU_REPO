@@ -63,8 +63,7 @@ module triangle_rasterize#(
     reg [3:0]status_reg;
     
     reg limiter_reset, limiter_reset_nxt;
-    reg [DATA_WIDTH:0] y_ctr;
-    reg [DATA_WIDTH:0] lower_limit;
+  //  reg [DATA_WIDTH:0] lower_limit;
     reg [DATA_WIDTH:0] upper_limit;
     
     wire [DATA_WIDTH:0] line1;
@@ -74,8 +73,7 @@ module triangle_rasterize#(
     
     
     reg [3:0]status_reg_nxt;
-    reg [DATA_WIDTH:0] y_ctr_nxt;
-    reg [DATA_WIDTH:0] lower_limit_nxt;
+ //   reg [DATA_WIDTH:0] lower_limit_nxt;
     reg [DATA_WIDTH:0] upper_limit_nxt;
     
     reg [DATA_WIDTH:0]out_x_nxt;
@@ -153,14 +151,13 @@ module triangle_rasterize#(
     begin
     
         if(rst == 1'b1)begin
-             status_reg = START;
+             status_reg <= START;
              
              out_x <= 0;
              out_y <= 0;             
              ack_out <= 0;
              ack_in <= 0;             
-             y_ctr <= 0;
-             lower_limit <= 0 ;
+   //          lower_limit <= 0 ;
              upper_limit <= 0;
              limiter_reset <= 1;
              line1_req <= 0;
@@ -182,8 +179,7 @@ module triangle_rasterize#(
             ack_out <= ack_out_nxt;
             ack_in <= ack_in_nxt;
         
-            y_ctr <= y_ctr_nxt;
-            lower_limit <= lower_limit_nxt ;
+      //      lower_limit <= lower_limit_nxt ;
             upper_limit <= upper_limit_nxt;
         
             line1_req <= line1_req_nxt;
@@ -212,61 +208,64 @@ module triangle_rasterize#(
                       
                    GET_LIMITS_LOWER:
                    begin                       
-                       if( out_y == mid_y)      status_reg_nxt = GET_LIMITS_UPPER;     
+                       if( out_y == mid_y)                                 status_reg_nxt = GET_LIMITS_UPPER;     
                        else if((line1_ack == 1'b1) && (line2_ack == 1'b1)) status_reg_nxt = RETRIGGER_LOW;                           
-                       else status_reg_nxt = GET_LIMITS_LOWER;                                      
+                       else                                                status_reg_nxt = GET_LIMITS_LOWER;                                      
                    end     
                    
-                   VERTICAL_INC_LOW: status_reg_nxt = GET_LIMITS_LOWER;  
+                   VERTICAL_INC_LOW:                                       status_reg_nxt = GET_LIMITS_LOWER;  
                                                      
                    RETRIGGER_LOW:
                    begin                                            
-                      if( (line1_ack == 1'b0) && (line2_ack == 1'b0) ) status_reg_nxt = INTERMEDIATE_DOWN;                      
-                      else status_reg_nxt = RETRIGGER_LOW;           
+                      if( (line1_ack == 1'b0) && (line2_ack == 1'b0) )     status_reg_nxt = INTERMEDIATE_DOWN;                      
+                      else                                                 status_reg_nxt = RETRIGGER_LOW;           
                    end  
                    INTERMEDIATE_DOWN:
                    begin
-                       if( out_x == upper_limit ) status_reg_nxt =  VERTICAL_INC_LOW;  
-                       else                       status_reg_nxt = DRAW_LOWER;                       
+                       if( out_x == upper_limit )                          status_reg_nxt =  VERTICAL_INC_LOW;  
+                       else                                                status_reg_nxt = DRAW_LOWER;                       
                    end
                      
                    DRAW_LOWER:
                    begin
-                       if( out_x+1 == upper_limit ) status_reg_nxt =  VERTICAL_INC_LOW;  
-                       else                         status_reg_nxt = DRAW_LOWER;
+                       if( out_x+1 == upper_limit )                         status_reg_nxt =  VERTICAL_INC_LOW;  
+                       else                                                 status_reg_nxt = DRAW_LOWER;
                    end       
                    
                    GET_LIMITS_UPPER:
                    begin                                             
-                       if( out_y == upper_y+1) status_reg_nxt = FINISH;    
-                       else if((line1_ack == 1'b1) && (line3_ack == 1'b1)) status_reg_nxt = RETRIGGER_UP;    
+                       if( out_y == upper_y+1)                              status_reg_nxt = FINISH;    
+                       else if((line1_ack == 1'b1) && (line3_ack == 1'b1))  status_reg_nxt = RETRIGGER_UP;    
+                       else                                                 status_reg_nxt = GET_LIMITS_UPPER;
                    end    
                       
                    DRAW_UPPER:
                    begin
-                       if( out_x+1 == upper_limit ) status_reg_nxt =  VERTICAL_INC_HI;                    
-                       else                         status_reg_nxt = DRAW_UPPER;    
+                       if( out_x+1 == upper_limit )                         status_reg_nxt =  VERTICAL_INC_HI;                    
+                       else                                                 status_reg_nxt = DRAW_UPPER;    
                    end  
                    
                    RETRIGGER_UP:
                    begin
-                       if( (line1_ack == 1'b0) && (line3_ack == 1'b0) ) status_reg_nxt = INTERMEDIATE_UP;                
-                       else                                             status_reg_nxt = RETRIGGER_UP;
+                       if( (line1_ack == 1'b0) && (line3_ack == 1'b0) )     status_reg_nxt = INTERMEDIATE_UP;                
+                       else                                                 status_reg_nxt = RETRIGGER_UP;
                    end
                                      
                    INTERMEDIATE_UP:
                    begin
-                       if( out_x == upper_limit ) status_reg_nxt =  VERTICAL_INC_HI;    
-                       else                       status_reg_nxt = DRAW_UPPER;                      
+                       if( out_x == upper_limit )                           status_reg_nxt =  VERTICAL_INC_HI;    
+                       else                                                 status_reg_nxt = DRAW_UPPER;                      
                    end
                    
-                   VERTICAL_INC_HI:              status_reg_nxt = GET_LIMITS_UPPER;                  
+                   VERTICAL_INC_HI:                                         status_reg_nxt = GET_LIMITS_UPPER;                  
                    
                    FINISH:
                    begin
                       if(req == 0) status_reg_nxt = START;
                       else status_reg_nxt = FINISH;
                     end
+                    
+                    default: status_reg_nxt = START;
                endcase
     
     end

@@ -34,9 +34,9 @@ module perspective_projection_fxp(
     output reg pp_req_out,
     
     // INPUT SIGNALS
-    input wire[31:0]in_x,   
-    input wire[31:0]in_y,   
-    input wire[31:0]in_z,
+    input wire[15:0]in_x,   
+    input wire[15:0]in_y,   
+    input wire[15:0]in_z,
     
     // RECIPROCAL MODULE HANDSHAKING AND DATA
     input wire rec_ack, 
@@ -45,8 +45,8 @@ module perspective_projection_fxp(
     output reg[31:0] reciprocal_in,
     
     // OUTPUT 2D     
-    output reg[31:0] out_x,
-    output reg[31:0] out_y
+    output reg[15:0] out_x,
+    output reg[15:0] out_y
     
     
     );
@@ -95,7 +95,7 @@ module perspective_projection_fxp(
     always@( posedge clk or posedge rst)
     begin
         if( rst == 1) begin
-            st_reg_nxt       <=0;
+            st_reg           <=0;
             normalized_x     <=0;
             normalized_y     <=0;
             normalized_w     <=0;
@@ -114,8 +114,8 @@ module perspective_projection_fxp(
             normalized_w  <= normalized_w_nxt;
             pp_ack_in     <= pp_ack_nxt;
             rec_req       <= rec_req_nxt;    
-            out_x         <= out_x_nxt;
-            out_y         <= out_y_nxt;
+            out_x         <= out_x_nxt[15:0];
+            out_y         <= out_y_nxt[15:0];
             reciprocal_in <= reciprocal_in_nxt;
             pp_req_out    <= pp_req_out_nxt;
         end
@@ -128,21 +128,22 @@ module perspective_projection_fxp(
             
             START:                 if( pp_req_in == 1'b1 ) st_reg_nxt = GET_DATA;  
                                    else                    st_reg_nxt = START;                                   
-            GET_DATA:              st_reg_nxt           = RECIPROCAL_WAIT;                      
-            RECIPROCAL_WAIT:       if( rec_ack == 1 ) st_reg_nxt  = MUL_COEFF;
-                                   else               st_reg_nxt  = RECIPROCAL_WAIT;
-            MUL_COEFF:             st_reg_nxt  = SHIFT_RECIPROCAL;
-            SHIFT_RECIPROCAL:      st_reg_nxt  = NORMALIZE_COORDINATES;
-            NORMALIZE_COORDINATES: st_reg_nxt  = SHIFT_NORMALIZED;
-            SHIFT_NORMALIZED:      st_reg_nxt  = TO_PIXELS;    
-            TO_PIXELS:             st_reg_nxt  = SHIFT_2D;
-            SHIFT_2D:              st_reg_nxt  = APPLY_OFFSET;
-            APPLY_OFFSET:          st_reg_nxt  = TRIGGER_RASTERIZER;
-            TRIGGER_RASTERIZER:    if( pp_ack_out == 1 ) st_reg_nxt = FINISH;
+            GET_DATA:                                      st_reg_nxt = RECIPROCAL_WAIT;                      
+            RECIPROCAL_WAIT:       if( rec_ack == 1 )      st_reg_nxt  = MUL_COEFF;
+                                   else                    st_reg_nxt  = RECIPROCAL_WAIT;
+            MUL_COEFF:                                     st_reg_nxt  = SHIFT_RECIPROCAL;
+            SHIFT_RECIPROCAL:                              st_reg_nxt  = NORMALIZE_COORDINATES;
+            NORMALIZE_COORDINATES:                         st_reg_nxt  = SHIFT_NORMALIZED;
+            SHIFT_NORMALIZED:                              st_reg_nxt  = TO_PIXELS;    
+            TO_PIXELS:                                     st_reg_nxt  = SHIFT_2D;
+            SHIFT_2D:                                      st_reg_nxt  = APPLY_OFFSET;
+            APPLY_OFFSET:                                  st_reg_nxt  = TRIGGER_RASTERIZER;
+            TRIGGER_RASTERIZER:    if( pp_ack_out == 1 )   st_reg_nxt = FINISH;
+                                   else                    st_reg_nxt  = TRIGGER_RASTERIZER; 
             FINISH:
             begin                
-                if(pp_req_in == 0 ) st_reg_nxt  = START;
-                else st_reg_nxt  = FINISH;
+                if(pp_req_in == 0 )                        st_reg_nxt  = START;
+                else                                       st_reg_nxt  = FINISH;
             end
             default:                st_reg_nxt  = START;
                     
@@ -245,8 +246,8 @@ module perspective_projection_fxp(
             begin
                 pp_req_out_nxt = 0;
                 pp_ack_nxt = 0;
-                out_x_nxt  = out_x;
-                out_y_nxt  = out_y;
+                out_x_nxt  = 0;
+                out_y_nxt  = 0;
             end
         endcase
     end
