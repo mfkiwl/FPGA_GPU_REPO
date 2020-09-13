@@ -90,7 +90,7 @@ always@* begin
             else st_reg_nxt = START;
         end
         
-        PRE_SCALING:                  if( scaledVal_nxt < HALF ) st_reg_nxt = PRE_SCALING;
+        PRE_SCALING:                  if( scaledVal < HALF ) st_reg_nxt = PRE_SCALING;
                                       else                       st_reg_nxt = LINEAR_APPROX_MUL;
         LINEAR_APPROX_MUL:            st_reg_nxt = LINEAR_APPROX_SHIFT; 
         LINEAR_APPROX_SHIFT:          st_reg_nxt = LINEAR_APPROX_SUB;
